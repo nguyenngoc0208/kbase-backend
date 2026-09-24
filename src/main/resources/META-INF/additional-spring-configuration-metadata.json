@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "minio.url",
+      "type": "java.lang.String",
+      "description": "Địa chỉ kết nối MinIO Server"
+    },
+    {
+      "name": "minio.access-key",
+      "type": "java.lang.String",
+      "description": "Access Key MinIO"
+    },
+    {
+      "name": "minio.secret-key",
+      "type": "java.lang.String",
+      "description": "Secret Key MinIO"
+    },
+    {
+      "name": "minio.bucket-name",
+      "type": "java.lang.String",
+      "description": "Tên bucket lưu trữ tài liệu"
+    }
+  ]
+}
