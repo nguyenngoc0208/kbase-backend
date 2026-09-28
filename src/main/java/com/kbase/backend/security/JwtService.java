@@ -34,6 +34,11 @@ public class JwtService {
         return extractClaims(token).getSubject();
     }
 
+    /** Trích xuất claim "role" từ JWT (vd: "ROLE_ADMIN", "ROLE_OWNER", "ROLE_USER") */
+    public String extractRole(String token) {
+        return extractClaims(token).get("role", String.class);
+    }
+
     private Claims extractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -41,4 +46,4 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-}
+}

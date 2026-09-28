@@ -33,10 +33,11 @@ public class Document {
     @JoinColumn(name = "user_id", nullable = false)
     private User uploadedBy;
 
+    /** Project mà tài liệu này thuộc về (nullable nếu upload không vào project nào) */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "folder_id")
-    private Folder folder; // null nếu tài liệu ở thư mục gốc
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
-}
+}

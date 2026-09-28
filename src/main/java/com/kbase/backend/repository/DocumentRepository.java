@@ -1,9 +1,11 @@
 package com.kbase.backend.repository;
 
 import com.kbase.backend.entity.Document;
+import com.kbase.backend.entity.Project;
 import com.kbase.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,9 +14,18 @@ import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
+    @EntityGraph(attributePaths = {"uploadedBy", "project"})
     List<Document> findByUploadedByOrderByCreatedAtDesc(User user);
 
+    /** Tìm tất cả tài liệu trong một project */
+    @EntityGraph(attributePaths = {"uploadedBy", "project"})
+    List<Document> findByProjectOrderByCreatedAtDesc(Project project);
+
+    /** Xóa tất cả document thuộc project khi project bị xóa */
+    void deleteAllByProject(Project project);
+
     // Tìm kiếm theo tên file (không phân biệt hoa thường) kết hợp phân trang
+    @EntityGraph(attributePaths = {"uploadedBy", "project"})
     @Query("SELECT d FROM Document d WHERE d.uploadedBy = :user AND " +
             "(:keyword IS NULL OR LOWER(d.originalFileName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Document> searchMyDocuments(@Param("user") User user,

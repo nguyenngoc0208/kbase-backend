@@ -1,5 +1,6 @@
 package com.kbase.backend.dto;
 
+import com.kbase.backend.entity.Role;
 import com.kbase.backend.entity.User;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
     private Long id;
     private String email;
-    private User.Role role;
+    private Role role;
     private LocalDateTime createdAt;
 
     public static UserResponse fromEntity(User user) {
@@ -22,4 +23,4 @@ public class UserResponse {
                 .createdAt(user.getCreatedAt())
                 .build();
     }
-}
+}

@@ -13,6 +13,8 @@ public class DocumentResponse {
     private String originalFileName;
     private String contentType;
     private Long fileSize;
+    private Long projectId;
+    private String uploadedByEmail;
     private LocalDateTime createdAt;
 
     public static DocumentResponse fromEntity(Document doc) {
@@ -21,6 +23,8 @@ public class DocumentResponse {
                 .originalFileName(doc.getOriginalFileName())
                 .contentType(doc.getContentType())
                 .fileSize(doc.getFileSize())
+                .projectId(doc.getProject() != null ? doc.getProject().getId() : null)
+                .uploadedByEmail(doc.getUploadedBy() != null ? doc.getUploadedBy().getEmail() : null)
                 .createdAt(doc.getCreatedAt())
                 .build();
     }
