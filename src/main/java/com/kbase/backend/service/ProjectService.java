@@ -15,6 +15,7 @@ import com.kbase.backend.repository.DocumentRepository;
 import com.kbase.backend.repository.ProjectMemberRepository;
 import com.kbase.backend.repository.ProjectRepository;
 import com.kbase.backend.repository.UserRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,7 @@ public class ProjectService {
         this.documentRepository = documentRepository;
     }
 
-    // Tạo dự án mới (chỉ cho phép ROLE_OWNER hoặc ROLE_ADMIN)
+    // Tạo dự án mới (cho phép ROLE_OWNER hoặc ROLE_ADMIN)
     public ProjectResponse createProject(ProjectRequest request, User owner) {
         if (owner.getRole() != Role.ROLE_OWNER && owner.getRole() != Role.ROLE_ADMIN) {
             throw new AccessDeniedException("Chỉ người dùng có vai trò OWNER hoặc ADMIN mới có thể tạo dự án.");
@@ -57,10 +58,10 @@ public class ProjectService {
         return ProjectResponse.fromEntity(savedProject);
     }
 
-    // Lấy danh sách dự án mà người dùng hiện tại là Owner hoặc Member
+    // Lấy danh sách dự án (Đồng nhất hệ thống cho cả Admin, Owner, Member)
     @Transactional(readOnly = true)
     public List<ProjectResponse> getProjectsForUser(User user) {
-        List<Project> projectEntities = projectRepository.findAllByOwnerOrMember(user);
+        List<Project> projectEntities = projectRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         List<ProjectResponse> responseList = new ArrayList<>();
 
         for (Project project : projectEntities) {
@@ -70,7 +71,7 @@ public class ProjectService {
         return responseList;
     }
 
-    // Mời thành viên mới vào dự án qua email (chỉ dành cho Owner)
+    // Mời thành viên mới vào dự án qua email (dành cho Owner và Admin)
     public ProjectMemberResponse inviteMember(Long projectId, InviteMemberRequest request, User requester) {
         Project project = getProjectOrThrow(projectId);
         assertIsOwner(project, requester);
@@ -94,7 +95,7 @@ public class ProjectService {
         return ProjectMemberResponse.fromEntity(memberRepository.save(newMember));
     }
 
-    // Lấy danh sách thành viên của dự án (dành cho Owner và Member)
+    // Lấy danh sách thành viên của dự án
     @Transactional(readOnly = true)
     public List<ProjectMemberResponse> getMembers(Long projectId, User requester) {
         Project project = getProjectOrThrow(projectId);
@@ -110,7 +111,7 @@ public class ProjectService {
         return responseList;
     }
 
-    // Xóa dự án và toàn bộ dữ liệu thành viên, tài liệu thuộc dự án (chỉ Owner)
+    // Xóa dự án và toàn bộ dữ liệu thành viên, tài liệu thuộc dự án (chỉ Owner và Admin)
     public void deleteProject(Long projectId, User requester) {
         Project project = getProjectOrThrow(projectId);
         assertIsOwner(project, requester);
@@ -126,25 +127,25 @@ public class ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dự án với ID: " + projectId));
     }
 
-    // Kiểm tra người dùng có phải là Owner hoặc Member của dự án không
+    // Kiểm tra người dùng có quyền truy cập/xem dự án không (Đồng nhất hệ thống)
     public boolean isOwnerOrMember(Project project, User user) {
-        if (project.getOwner().getId().equals(user.getId())) {
-            return true;
-        }
-        return memberRepository.existsByProjectAndUser(project, user);
+        return true;
     }
 
-    // Bắt buộc người dùng phải là Owner của dự án
+    // Bắt buộc người dùng phải là Owner hoặc Admin của dự án
     private void assertIsOwner(Project project, User user) {
+        if (user.getRole() == Role.ROLE_ADMIN) {
+            return;
+        }
         if (!project.getOwner().getId().equals(user.getId())) {
-            throw new AccessDeniedException("Chỉ Trưởng dự án (Owner) mới có quyền thực hiện thao tác này.");
+            throw new AccessDeniedException("Chỉ Trưởng dự án (Owner) hoặc Admin mới có quyền thực hiện thao tác này.");
         }
     }
 
-    // Bắt buộc người dùng phải là Owner hoặc Member của dự án
+    // Bắt buộc người dùng phải có quyền xem dự án
     private void assertIsMemberOrOwner(Project project, User user) {
         if (!isOwnerOrMember(project, user)) {
-            throw new AccessDeniedException("Bạn không phải là thành viên thuộc dự án này.");
+            throw new AccessDeniedException("Bạn không có quyền xem dự án này.");
         }
     }
 }

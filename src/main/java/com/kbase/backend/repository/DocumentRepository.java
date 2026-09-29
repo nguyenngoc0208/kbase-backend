@@ -24,11 +24,10 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     /** Xóa tất cả document thuộc project khi project bị xóa */
     void deleteAllByProject(Project project);
 
-    // Tìm kiếm theo tên file (không phân biệt hoa thường) kết hợp phân trang
+    // Tìm kiếm tất cả tài liệu đồng nhất hệ thống kết hợp phân trang
     @EntityGraph(attributePaths = {"uploadedBy", "project"})
-    @Query("SELECT d FROM Document d WHERE d.uploadedBy = :user AND " +
+    @Query("SELECT d FROM Document d WHERE " +
             "(:keyword IS NULL OR LOWER(d.originalFileName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Document> searchMyDocuments(@Param("user") User user,
-            @Param("keyword") String keyword,
+    Page<Document> searchAllDocuments(@Param("keyword") String keyword,
             Pageable pageable);
 }

@@ -53,9 +53,9 @@ public class SecurityConfig {
                         .permitAll()
                         // Phân quyền truy cập theo vai trò người dùng (ROLE_ADMIN, ROLE_OWNER)
                         .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/projects").hasAuthority("ROLE_OWNER")
-                        .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasAuthority("ROLE_OWNER")
-                        .requestMatchers(HttpMethod.POST, "/api/projects/*/members").hasAuthority("ROLE_OWNER")
+                        .requestMatchers(HttpMethod.POST, "/api/projects").hasAnyAuthority("ROLE_OWNER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/projects/**").hasAnyAuthority("ROLE_OWNER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/projects/*/members").hasAnyAuthority("ROLE_OWNER", "ROLE_ADMIN")
                         .anyRequest().authenticated())
                 // Chèn JWT Filter kiểm tra token trước Filter xác thực mặc định
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

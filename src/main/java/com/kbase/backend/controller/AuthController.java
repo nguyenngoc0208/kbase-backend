@@ -3,6 +3,7 @@ package com.kbase.backend.controller;
 import com.kbase.backend.dto.AuthResponse;
 import com.kbase.backend.dto.LoginRequest;
 import com.kbase.backend.dto.RegisterRequest;
+import com.kbase.backend.dto.ResetPasswordRequest;
 import com.kbase.backend.dto.UserResponse;
 import com.kbase.backend.service.UserService;
 import jakarta.validation.Valid;
@@ -30,5 +31,11 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = userService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request);
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công!");
     }
 }

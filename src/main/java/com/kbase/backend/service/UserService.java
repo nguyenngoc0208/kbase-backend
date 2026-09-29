@@ -3,6 +3,7 @@ package com.kbase.backend.service;
 import com.kbase.backend.dto.AuthResponse;
 import com.kbase.backend.dto.LoginRequest;
 import com.kbase.backend.dto.RegisterRequest;
+import com.kbase.backend.dto.ResetPasswordRequest;
 import com.kbase.backend.dto.UserResponse;
 import com.kbase.backend.entity.Role;
 import com.kbase.backend.entity.User;
@@ -37,7 +38,6 @@ public class UserService {
             throw new DuplicateResourceException("Email đã được sử dụng: " + request.getEmail());
         }
 
-        // Chỉ cho phép đăng ký ROLE_OWNER hoặc ROLE_USER — Admin được tạo bằng DataInitializer
         Role role = request.getRole();
         if (role == null || role == Role.ROLE_ADMIN) {
             role = Role.ROLE_USER;
@@ -70,6 +70,14 @@ public class UserService {
                 .build();
     }
 
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản với email: " + request.getEmail()));
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
     // ---- Admin operations ----
 
     public List<UserResponse> getAllUsers() {
@@ -88,4 +96,4 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng: " + email));
     }
-}
+}
